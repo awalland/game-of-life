@@ -11,6 +11,9 @@ use std::time::Duration;
 * A dead cell will be brought back to live if it has exactly three live neighbors.
 */
 
+const GRID_SIZE: usize = 130;
+const SLEEP_MILLIS: u64 = 60;
+
 #[derive(PartialEq)]
 enum CellState {
     Dead,
@@ -48,6 +51,7 @@ impl<'a> Grid<'a> {
     fn randomize(&mut self) {
         let mut rng = rand::thread_rng();
         let mut new_grid = Grid::new(self.cells.len());
+
         for cell_row in 0..self.cells.len() {
             let row = &self.cells[cell_row];
             for cell_column in 0..row.len() {
@@ -91,57 +95,99 @@ impl<'a> Grid<'a> {
         let mut alive_neighbors = 0;
         let is_first_column = cell_column == 0;
         let is_last_column = cell_column == row.len() - 1;
-        if !is_first_column {
-            // same row, left column
+        // horizontal neighbors
+        // same row, left column
+        if is_first_column {
+            if *row.last().unwrap() == &Alive {
+                alive_neighbors += 1;
+            }
+        } else {
             if row[cell_column - 1] == &Alive {
                 alive_neighbors += 1;
             }
         }
-
-        if !is_last_column {
-            // same row, right column
+        // same row, right column
+        if is_last_column {
+            if *row.first().unwrap() == &Alive {
+                alive_neighbors += 1;
+            }
+        } else {
             if row[cell_column + 1] == &Alive {
                 alive_neighbors += 1;
             }
         }
 
-        if cell_row > 0 {
-            let previous_row = &self.cells[cell_row - 1];
-            // previous row, same column
-            if previous_row[cell_column] == &Alive {
+        // vertical neighbors
+        let previous_row = if cell_row > 0 {
+            &self.cells[cell_row - 1]
+        } else {
+            &self.cells.last().unwrap()
+        };
+        // previous row, same column
+        if previous_row[cell_column] == &Alive {
+            alive_neighbors += 1;
+        }
+
+        // previous row, left column
+        if is_first_column {
+            if *previous_row.last().unwrap() == &Alive {
                 alive_neighbors += 1;
             }
-            // previous row, left column
-            if !is_first_column && previous_row[cell_column - 1] == &Alive {
-                alive_neighbors += 1;
-            }
-            // previous row, right column
-            if !is_last_column && previous_row[cell_column + 1] == &Alive {
+        } else {
+            if previous_row[cell_column - 1] == &Alive {
                 alive_neighbors += 1;
             }
         }
-        if cell_row < self.cells.len() - 1 {
-            let next_row = &self.cells[cell_row + 1];
-            // next row, same column
-            if next_row[cell_column] == &Alive {
+
+        // previous row, right column
+        if is_last_column {
+            if *previous_row.first().unwrap() == &Alive {
                 alive_neighbors += 1;
             }
-            // next row, left column
-            if !is_first_column && next_row[cell_column - 1] == &Alive {
-                alive_neighbors += 1;
-            }
-            // next row, right column
-            if !is_last_column && next_row[cell_column + 1] == &Alive {
+        } else {
+            if previous_row[cell_column + 1] == &Alive {
                 alive_neighbors += 1;
             }
         }
+
+        //
+
+        let next_row = if cell_row < (self.cells.len() - 1) {
+            &self.cells[cell_row + 1]
+        } else {
+            &self.cells.first().unwrap()
+        };
+
+        // next row, same column
+        if next_row[cell_column] == &Alive {
+            alive_neighbors += 1;
+        }
+        // next row, left column
+        if is_first_column {
+            if *next_row.last().unwrap() == &Alive {
+                alive_neighbors += 1;
+            }
+        } else {
+            if next_row[cell_column - 1] == &Alive {
+                alive_neighbors += 1;
+            }
+        }
+        // next row, right column
+        if is_last_column {
+            if *next_row.first().unwrap() == &Alive {
+                alive_neighbors += 1;
+            }
+        } else {
+            if next_row[cell_column + 1] == &Alive {
+                alive_neighbors += 1;
+            }
+        }
+
         alive_neighbors
     }
 }
 
 fn main() {
-    const GRID_SIZE: usize = 130;
-
     let mut grid = Grid::new(GRID_SIZE);
     grid.randomize();
 
@@ -150,7 +196,7 @@ fn main() {
         grid.paint();
         grid.advance();
         //delay between each generation in milliseconds
-        thread::sleep(Duration::from_millis(30));
+        thread::sleep(Duration::from_millis(SLEEP_MILLIS));
     }
 }
 
