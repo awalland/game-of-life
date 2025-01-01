@@ -37,6 +37,11 @@ impl<'a> Grid<'a> {
         }
     }
     fn paint(&self) {
+        println!();
+        println!();
+        println!();
+        println!();
+
         for row in self.cells.iter() {
             for cell in row.iter() {
                 print!("{}", cell.character());
@@ -140,7 +145,7 @@ impl<'a> Grid<'a> {
 }
 
 fn main() {
-    const GRID_SIZE: usize = 130;
+    const GRID_SIZE: usize = 30;
 
     let mut grid = Grid::new(GRID_SIZE);
     grid.randomize();
@@ -150,7 +155,7 @@ fn main() {
         grid.paint();
         grid.advance();
         //delay between each generation in milliseconds
-        thread::sleep(Duration::from_millis(30));
+        thread::sleep(Duration::from_millis(60));
     }
 }
 
