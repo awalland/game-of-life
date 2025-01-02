@@ -1,6 +1,5 @@
 use crate::CellState::{Alive, Dead, Infected};
 use rand::Rng;
-use std::process::Command;
 use std::thread;
 use std::time::Duration;
 
@@ -212,7 +211,7 @@ impl<'a> Grid<'a> {
 }
 
 fn main() {
-    const GRID_SIZE: usize = 120;
+    const GRID_SIZE: usize = 30;
 
     let mut grid = Grid::new(GRID_SIZE);
     grid.randomize();
@@ -227,9 +226,5 @@ fn main() {
 }
 
 fn clear_screen() {
-    if cfg!(unix) {
-        let _ = Command::new("clear").status();
-    } else if cfg!(windows) {
-        let _ = Command::new("cls").status();
-    }
+    print!("\x1B[2J\x1B[1;1H");
 }
