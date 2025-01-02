@@ -1,4 +1,3 @@
-use std::char::DecodeUtf16;
 use crate::CellState::{Alive, Dead, Infected};
 use rand::Rng;
 use std::process::Command;
@@ -16,7 +15,7 @@ use std::time::Duration;
 enum CellState {
     Dead,
     Alive,
-    Infected
+    Infected,
 }
 
 impl CellState {
@@ -24,7 +23,7 @@ impl CellState {
         match self {
             Dead => "░░░",
             Alive => "███",
-            Infected => " 💀 ",
+            Infected => "XXX",
         }
     }
 }
@@ -60,10 +59,9 @@ impl<'a> Grid<'a> {
             let row = &self.cells[cell_row];
             for cell_column in 0..row.len() {
                 let num = rng.gen_range(0..100);
-                new_grid.cells[cell_row][cell_column] =
-                if num <=51 {
+                new_grid.cells[cell_row][cell_column] = if num <= 51 {
                     &Alive
-                } else if num <=98 {
+                } else if num <= 98 {
                     &Dead
                 } else {
                     &Infected
@@ -83,7 +81,7 @@ impl<'a> Grid<'a> {
                 let infected_neighbors = self.infected_neighbors(cell_row, cell_column, row);
                 let new_state = match current_state {
                     Alive => {
-                        if infected_neighbors >2 {
+                        if infected_neighbors > 1 {
                             &Infected
                         } else if alive_neighbors < 2 || alive_neighbors > 3 {
                             &Dead
@@ -98,9 +96,7 @@ impl<'a> Grid<'a> {
                             &Dead
                         }
                     }
-                    Infected => {
-                        &Infected
-                    }
+                    Infected => &Infected,
                 };
                 new_grid.cells[cell_row][cell_column] = &new_state;
             }
@@ -158,7 +154,12 @@ impl<'a> Grid<'a> {
         }
         alive_neighbors
     }
-    fn infected_neighbors(&self, cell_row: usize, cell_column: usize, row: &Vec<&CellState>) -> i32 {
+    fn infected_neighbors(
+        &self,
+        cell_row: usize,
+        cell_column: usize,
+        row: &Vec<&CellState>,
+    ) -> i32 {
         let mut alive_neighbors = 0;
         let is_first_column = cell_column == 0;
         let is_last_column = cell_column == row.len() - 1;
@@ -211,7 +212,7 @@ impl<'a> Grid<'a> {
 }
 
 fn main() {
-    const GRID_SIZE: usize = 30;
+    const GRID_SIZE: usize = 120;
 
     let mut grid = Grid::new(GRID_SIZE);
     grid.randomize();
